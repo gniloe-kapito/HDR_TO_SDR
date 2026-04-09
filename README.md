@@ -1,4 +1,75 @@
-# HDR конвертор 
-конвертирует hdr в sdr по идеии поддерживает av1/hevc/h.264
-для работы требуется скачать ffmpeg и закинуть его в C:\ffmpeg\bin
-<img width="922" height="903" alt="{A72B36C5-B3AB-4EFD-98F7-4BF5DC44ECFE}" src="https://github.com/user-attachments/assets/03b467e8-c23f-4f4b-9995-7c6ed0a98ae4" />
+# HDR to SDR Studio
+
+Небольшое Windows-приложение на Python для конвертации HDR-видео в SDR через `ffmpeg` с упором на удобную настройку, пакетную обработку и GPU-ускорение.
+
+## Что умеет
+
+- Конвертация HDR → SDR для Plex и обычного локального просмотра
+- Кодирование через `hevc_nvenc` / `h264_nvenc` или CPU-режимы `libx265` / `libx264`
+- GPU-обработка HDR → SDR через `libplacebo` (Vulkan) или `tonemap_opencl`
+- Пакетная обработка папок
+- Копирование аудио и субтитров без лишней перекодировки
+
+## Требования
+
+- Windows 10 или Windows 11
+- Python 3.10+
+- `ffmpeg.exe` и `ffprobe.exe`
+- Python-зависимость `customtkinter`
+
+Для максимальной скорости желательно:
+
+- видеокарта NVIDIA GTX / RTX
+- сборка FFmpeg с поддержкой `hevc_nvenc` / `h264_nvenc`
+- фильтр `libplacebo` и аппаратное ускорение `vulkan`
+
+## Установка
+
+1. Установите Python 3.10 или новее.
+2. Установите зависимость:
+
+```bash
+pip install customtkinter
+```
+
+3. Скачайте полную сборку FFmpeg.
+4. Укажите пути к `ffmpeg.exe` и `ffprobe.exe` в приложении.
+
+По умолчанию приложение ожидает их по пути:
+
+```text
+C:\ffmpeg\bin\ffmpeg.exe
+C:\ffmpeg\bin\ffprobe.exe
+```
+
+## Рекомендуемая сборка FFmpeg
+
+Подходит full build, в которой есть:
+
+- `hevc_nvenc`
+- `h264_nvenc`
+- `libplacebo`
+- `tonemap_opencl`
+- `cuda`
+- `vulkan`
+- `opencl`
+
+## Запуск
+
+```bash
+python hdr_converter.py
+```
+
+Если у вас несколько версий Python, используйте тот интерпретатор, который реально установлен в системе.
+
+## Какой режим лучше выбрать
+
+- `Авто` — лучший вариант по умолчанию
+- `GPU Vulkan / libplacebo` — самый быстрый и предпочтительный режим для современных NVIDIA
+- `GPU OpenCL` — запасной GPU-режим
+- `CPU zscale + tonemap` — максимально совместимый, но заметно медленнее
+
+## Замечания
+
+- Общая загрузка GPU в диспетчере задач не всегда показывает реальную загрузку NVENC/NVDEC.
+- Для Plex лучше сначала проверить несколько коротких клипов и только потом запускать пакетную обработку всей библиотеки.
